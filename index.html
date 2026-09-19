@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Precios - Pollo K'ochala</title>
+    <style>
+        @font-face {
+            font-family: 'FuenteDiseño';
+            src: url('Montserrat-ExtraBoldItalic.ttf');
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000; /* Fondo negro por si sobran bordes */
+            overflow: hidden; 
+        }
+
+        #pantalla {
+            width: 1080px;  
+            height: 1920px; 
+            
+            /* Asegúrate de que este nombre coincida con la imagen de fondo de la carnicería */
+            background-image: url('123465465.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;
+            /* La rotación y escala ahora las hace el JavaScript de abajo */
+        }
+
+        #contenedor-precios {
+            position: absolute;
+            top: 34%;  
+            right: 8%; 
+            width: 300px; 
+            height: 52%; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; 
+            padding-bottom: 0%; 
+            box-sizing: border-box;
+        }
+
+        .precio-item {
+            font-family: 'FuenteDiseño', sans-serif;
+            color: #ffffff; 
+            font-size: 38px; 
+            text-align: right;
+            font-weight: bold;
+            margin: 0;
+            padding: 0;
+            line-height: 1; 
+            height: auto; 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pantalla">
+        <div id="contenedor-precios">
+            <div class="precio-item" id="precio-pollo">--</div>
+            <div class="precio-item" id="precio-pierna">--</div>
+            <div class="precio-item" id="precio-pechuga">--</div>
+            <div class="precio-item" id="precio-alas">--</div>
+            <div class="precio-item" id="precio-cazuela">--</div>
+            <div class="precio-item" id="precio-menudo">--</div>
+            <div class="precio-item" id="precio-cuellos">--</div>
+            <div class="precio-item" id="precio-higado">--</div>
+            <div class="precio-item" id="precio-filete">--</div>
+            <div class="precio-item" id="precio-costilla">--</div>
+            <div class="precio-item" id="precio-cuero">--</div>
+            <div class="precio-item" id="precio-molidae">--</div>
+            <div class="precio-item" id="precio-molidac">--</div>
+            <div class="precio-item" id="precio-piernas">--</div>
+            <div class="precio-item" id="precio-muslo">--</div>
+        </div>
+    </div>
+
+    <script>
+        const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJA1Ca73vGi7pQxe5AGv2ZfyHoxLQnK6OXiGySf6v8LfgayEtI4ZLISWSNAol7vuo2PFO1kcfNmsL0/pub?output=csv';
+
+        // 1. FUNCIÓN DE AUTO-ENCUADRE PARA LA TV
+        function ajustarPantalla() {
+            const anchoVentana = window.innerWidth;
+            const altoVentana = window.innerHeight;
+            
+            // Como rotamos 90 grados, el alto del diseño (1920) debe encajar en el ancho de la TV
+            const escalaAncho = anchoVentana / 1920; 
+            const escalaAlto = altoVentana / 1080;
+            
+            // Elegimos la escala más pequeña para que no se recorte nada
+            const escalaFinal = Math.min(escalaAncho, escalaAlto);
+
+            document.getElementById('pantalla').style.transform = `translate(-50%, -50%) rotate(90deg) scale(${escalaFinal})`;
+        }
+
+        // 2. FUNCIÓN PARA LEER PRECIOS
+        async function actualizarPrecios() {
+            try {
+                const respuesta = await fetch(urlCSV);
+                if (!respuesta.ok) return; 
+
+                const datos = await respuesta.text();
+                const filas = datos.split('\n');
+                
+                const ids = [
+                    'precio-pollo', 'precio-pierna', 'precio-pechuga', 'precio-alas',
+                    'precio-cazuela', 'precio-menudo', 'precio-cuellos', 'precio-higado',
+                    'precio-filete', 'precio-costilla', 'precio-cuero', 'precio-molidae',
+                    'precio-molidac', 'precio-piernas', 'precio-muslo'
+                ];
+
+                for (let i = 0; i < ids.length; i++) {
+                    if(filas[i]) {
+                        const separador = filas[i].includes(';') ? ';' : ',';
+                        const columnas = filas[i].split(separador);
+                        
+                        if(columnas.length >= 2) {
+                            document.getElementById(ids[i]).innerText = columnas[1].trim();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error al actualizar:", error);
+            }
+        }
+
+        // Ejecutar funciones al iniciar
+        window.onload = function() {
+            ajustarPantalla();
+            actualizarPrecios();
+        };
+
+        // Si alguien cambia el tamaño de la ventana, el diseño se ajusta solo
+        window.onresize = ajustarPantalla;
+        
+        // Refrescar precios cada 2 minutos
+        setInterval(actualizarPrecios, 120000); 
+    </script>
+
+</body>
+</html>
